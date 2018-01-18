@@ -382,8 +382,11 @@ atheme_pbkdf2v2_compute(const char *const restrict password, struct pbkdf2v2_dbe
 
 #ifdef HAVE_LIBIDN
 	if (dbe->scram && ! atheme_pbkdf2v2_scram_normalize(key, sizeof key))
-		// This function logs messages on failure
+	{
+		(void) slog(LG_DEBUG, "%s: SASLprep normalization of password failed", __func__);
+		(void) explicit_bzero(key, sizeof key);
 		return false;
+	}
 #endif /* HAVE_LIBIDN */
 
 	const size_t kl = strlen(key);
@@ -391,15 +394,18 @@ atheme_pbkdf2v2_compute(const char *const restrict password, struct pbkdf2v2_dbe
 	if (! kl)
 	{
 		(void) slog(LG_DEBUG, "%s: password length == 0", __func__);
+		(void) explicit_bzero(key, sizeof key);
 		return false;
 	}
 
 	if (! digest_pbkdf2_hmac(dbe->md, key, kl, dbe->salt, dbe->sl, dbe->c, dbe->cdg, dbe->dl))
 	{
 		(void) slog(LG_ERROR, "%s: digest_pbkdf2_hmac() failed", __func__);
+		(void) explicit_bzero(key, sizeof key);
 		return false;
 	}
 
+	(void) explicit_bzero(key, sizeof key);
 	return true;
 }
 
