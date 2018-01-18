@@ -59,7 +59,7 @@ struct pbkdf2v2_dbentry
 	char             salt64[PBKDF2_SALTLEN_MAX * 3];    // PBKDF2 Salt (Base64-encoded)
 	size_t           dl;                                // Digest Length
 	size_t           sl;                                // Salt Length
-	unsigned int     alg;                               // Atheme Digest Interface Algorithm Identifier
+	unsigned int     md;                                // Atheme Digest Interface Algorithm Identifier
 	unsigned int     a;                                 // PBKDF2v2 PRF ID (one of the macros above)
 	unsigned int     c;                                 // PBKDF2 Iteration Count
 	bool             scram;                             // Whether to use HMAC-SHA or SCRAM-SHA

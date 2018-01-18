@@ -395,7 +395,7 @@ mech_step_clientproof(struct scramsha_session *const restrict s, const void *con
 
 	// Calculate ClientSignature
 	unsigned char ClientSignature[DIGEST_MDLEN_MAX];
-	if (! digest_oneshot_hmac(s->db.alg, s->db.shk, s->db.dl, AuthMessage, (size_t) alen, ClientSignature, NULL))
+	if (! digest_oneshot_hmac(s->db.md, s->db.shk, s->db.dl, AuthMessage, (size_t) alen, ClientSignature, NULL))
 	{
 		(void) slog(LG_ERROR, "%s: digest_oneshot_hmac() for ClientSignature failed", __func__);
 		goto error;
@@ -408,7 +408,7 @@ mech_step_clientproof(struct scramsha_session *const restrict s, const void *con
 
 	// Compute StoredKey from derived ClientKey
 	unsigned char StoredKey[DIGEST_MDLEN_MAX];
-	if (! digest_oneshot(s->db.alg, ClientKey, s->db.dl, StoredKey, NULL))
+	if (! digest_oneshot(s->db.md, ClientKey, s->db.dl, StoredKey, NULL))
 	{
 		(void) slog(LG_ERROR, "%s: digest_oneshot() for StoredKey failed", __func__);
 		goto error;
@@ -427,7 +427,7 @@ mech_step_clientproof(struct scramsha_session *const restrict s, const void *con
 
 	// Calculate ServerSignature
 	unsigned char ServerSignature[DIGEST_MDLEN_MAX];
-	if (! digest_oneshot_hmac(s->db.alg, s->db.ssk, s->db.dl, AuthMessage, (size_t) alen, ServerSignature, NULL))
+	if (! digest_oneshot_hmac(s->db.md, s->db.ssk, s->db.dl, AuthMessage, (size_t) alen, ServerSignature, NULL))
 	{
 		(void) slog(LG_ERROR, "%s: digest_oneshot_hmac() for ServerSignature failed", __func__);
 		goto error;

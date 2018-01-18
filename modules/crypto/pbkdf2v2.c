@@ -84,7 +84,7 @@ atheme_pbkdf2v2_determine_params(struct pbkdf2v2_dbentry *const restrict dbe)
 			/* FALLTHROUGH */
 		case PBKDF2_PRF_HMAC_SHA1:
 		case PBKDF2_PRF_HMAC_SHA1_S64:
-			dbe->alg = DIGALG_SHA1;
+			dbe->md = DIGALG_SHA1;
 			dbe->dl = DIGEST_MDLEN_SHA1;
 			break;
 
@@ -94,7 +94,7 @@ atheme_pbkdf2v2_determine_params(struct pbkdf2v2_dbentry *const restrict dbe)
 			/* FALLTHROUGH */
 		case PBKDF2_PRF_HMAC_SHA2_256:
 		case PBKDF2_PRF_HMAC_SHA2_256_S64:
-			dbe->alg = DIGALG_SHA2_256;
+			dbe->md = DIGALG_SHA2_256;
 			dbe->dl = DIGEST_MDLEN_SHA2_256;
 			break;
 
@@ -104,7 +104,7 @@ atheme_pbkdf2v2_determine_params(struct pbkdf2v2_dbentry *const restrict dbe)
 			/* FALLTHROUGH */
 		case PBKDF2_PRF_HMAC_SHA2_512:
 		case PBKDF2_PRF_HMAC_SHA2_512_S64:
-			dbe->alg = DIGALG_SHA2_512;
+			dbe->md = DIGALG_SHA2_512;
 			dbe->dl = DIGEST_MDLEN_SHA2_512;
 			break;
 
@@ -209,17 +209,17 @@ atheme_pbkdf2v2_scram_derive(const struct pbkdf2v2_dbentry *const dbe, const uns
 {
 	unsigned char cck[DIGEST_MDLEN_MAX];
 
-	if (csk && ! digest_oneshot_hmac(dbe->alg, idg, dbe->dl, ServerKeyStr, sizeof ServerKeyStr, csk, NULL))
+	if (csk && ! digest_oneshot_hmac(dbe->md, idg, dbe->dl, ServerKeyStr, sizeof ServerKeyStr, csk, NULL))
 	{
 		(void) slog(LG_ERROR, "%s: digest_oneshot_hmac(idg) failed for csk", __func__);
 		return false;
 	}
-	if (chk && ! digest_oneshot_hmac(dbe->alg, idg, dbe->dl, ClientKeyStr, sizeof ClientKeyStr, cck, NULL))
+	if (chk && ! digest_oneshot_hmac(dbe->md, idg, dbe->dl, ClientKeyStr, sizeof ClientKeyStr, cck, NULL))
 	{
 		(void) slog(LG_ERROR, "%s: digest_oneshot_hmac(idg) failed for cck", __func__);
 		return false;
 	}
-	if (chk && ! digest_oneshot(dbe->alg, cck, dbe->dl, chk, NULL))
+	if (chk && ! digest_oneshot(dbe->md, cck, dbe->dl, chk, NULL))
 	{
 		(void) slog(LG_ERROR, "%s: digest_oneshot(cck) failed for chk", __func__);
 		return false;
@@ -394,7 +394,7 @@ atheme_pbkdf2v2_compute(const char *const restrict password, struct pbkdf2v2_dbe
 		return false;
 	}
 
-	if (! digest_pbkdf2_hmac(dbe->alg, key, kl, dbe->salt, dbe->sl, dbe->c, dbe->cdg, dbe->dl))
+	if (! digest_pbkdf2_hmac(dbe->md, key, kl, dbe->salt, dbe->sl, dbe->c, dbe->cdg, dbe->dl))
 	{
 		(void) slog(LG_ERROR, "%s: digest_pbkdf2_hmac() failed", __func__);
 		return false;
