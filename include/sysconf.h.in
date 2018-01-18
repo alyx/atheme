@@ -3,6 +3,9 @@
 /* Define if building universal (internal helper macro) */
 #undef AC_APPLE_UNIVERSAL_BUILD
 
+/* Front-end header for digest interface */
+#undef DIGEST_FE_HEADER
+
 /* Define to 1 if translation of program messages to the user's native
    language is requested. */
 #undef ENABLE_NLS
@@ -75,6 +78,9 @@
 
 /* Define to 1 if we have GNU libidn available. */
 #undef HAVE_LIBIDN
+
+/* Define to 1 if we have ARM mbedTLS available. */
+#undef HAVE_LIBMBEDCRYPTO
 
 /* Define to 1 if you have the `nsl' library (-lnsl). */
 #undef HAVE_LIBNSL

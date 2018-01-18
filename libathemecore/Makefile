@@ -22,6 +22,7 @@ SRCS =				\
 	culture.c		\
 	database_backend.c	\
 	datastream.c		\
+	$(DIGEST_C)		\
 	entity.c		\
 	explicit_bzero.c	\
 	flags.c			\
@@ -31,7 +32,6 @@ SRCS =				\
 	linker.c		\
 	logger.c		\
 	match.c			\
-	md5.c			\
 	memory.c		\
 	module.c		\
 	node.c			\
@@ -68,6 +68,6 @@ include ../buildsys.mk
 
 CPPFLAGS	+= $(PCRE_CFLAGS) $(LIBQRENCODE_CFLAGS) -I../include
 CFLAGS		+= $(LIB_CFLAGS)
-LIBS		+= $(LIBINTL) $(PCRE_LIBS) $(LIBQRENCODE_LIBS)
+LIBS		+= $(LIBCRYPTO_LIBS) $(LIBMBEDCRYPTO_LIBS) $(LIBINTL) $(PCRE_LIBS) $(LIBQRENCODE_LIBS)
 
 build: depend all

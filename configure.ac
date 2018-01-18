@@ -161,6 +161,37 @@ AS_IF([test "x${LIBCRYPTO}" = "xYes"], [
 
 
 
+LIBMBEDCRYPTO="No"
+LIBMBEDCRYPTO_LIBS=""
+AC_ARG_WITH([mbedtls],
+	[AS_HELP_STRING([--with-mbedtls], [Compile with ARM mbedTLS support.])],
+	[], [with_mbedtls="auto"])
+
+case "${with_mbedtls}" in
+	no | yes | auto)
+		;;
+	*)
+		AC_MSG_ERROR([invalid option for --with-mbedtls])
+		;;
+esac
+
+AS_IF([test "x${with_mbedtls}" != "xno"], [
+	LIBS_SAVED="${LIBS}"
+	AC_SEARCH_LIBS([mbedtls_md_setup], [mbedcrypto], [
+		LIBMBEDCRYPTO="Yes"
+		AS_IF([test "x${ac_cv_search_mbedtls_md_setup}" != "xnone required"],
+			[LIBMBEDCRYPTO_LIBS="$ac_cv_search_mbedtls_md_setup"])
+		AC_DEFINE([HAVE_LIBMBEDCRYPTO], [1], [Define to 1 if we have ARM mbedTLS available.])
+		AC_SUBST([LIBMBEDCRYPTO_LIBS])
+	], [
+		AS_IF([test "x${with_mbedtls}" != "xauto"],
+			[AC_MSG_ERROR([--with-mbedtls was specified but ARM mbedTLS could not be found])])
+	])
+	LIBS="${LIBS_SAVED}"
+])
+
+
+
 LIBIDN="No"
 LIBIDN_LIBS=""
 AC_ARG_WITH([libidn],
@@ -550,11 +581,37 @@ if test "x${USE_NLS}" = "xyes"; then
 fi
 AC_SUBST([PODIR])
 
+
+
 CPPFLAGS="${CPPFLAGS} -DPREFIX=\\\"\${prefix}\\\" -DBINDIR=\\\"\${bindir}\\\" -DLOCALEDIR=\\\"\${LOCALEDIR}\\\" -DMODDIR=\\\"\${MODDIR}\\\" -DSHAREDIR=\\\"${SHAREDIR}\\\" -DSYSCONFDIR=\\\"${sysconfdir}\\\" -DLOGDIR=\\\"${LOGDIR}\\\" -DRUNDIR=\\\"${RUNDIR}\\\" -DDATADIR=\\\"${DATADIR}\\\""
 LDFLAGS="${LDFLAGS} ${LDFLAGS_RPATH}"
 
 AC_SUBST([CPPFLAGS])
 AC_SUBST([LDFLAGS])
+
+
+
+dnl Digest interface to use
+DIGEST_C="digest_fe_internal.c digest_fe_internal_testsuite.c digest_be_md5.c digest_be_sha1.c"
+DIGEST_H="digest_fe_internal.h"
+DIGEST_FRONTEND="Internal"
+
+AS_IF([test "x${DIGEST_FRONTEND}x${LIBMBEDCRYPTO}" = "xInternalxYes"], [
+	DIGEST_C="digest_fe_mbedtls.c"
+	DIGEST_H="digest_fe_mbedtls.h"
+	DIGEST_FRONTEND="ARM mbedTLS"
+])
+
+AS_IF([test "x${DIGEST_FRONTEND}x${LIBCRYPTO}" = "xInternalxYes"], [
+	DIGEST_C="digest_fe_openssl.c"
+	DIGEST_H="digest_fe_openssl.h"
+	DIGEST_FRONTEND="OpenSSL"
+])
+
+AC_SUBST([DIGEST_C])
+AC_DEFINE_UNQUOTED([DIGEST_FE_HEADER], ["${DIGEST_H}"], [Front-end header for digest interface])
+
+
 
 BUILDSYS_TOUCH_DEPS
 
@@ -609,11 +666,13 @@ Configuration:
 
     CrackLib Support ........: ${LIBCRACKLIB}
     GNU libidn Support ......: ${LIBIDN}
+    ARM mbedTLS Support .....: ${LIBMBEDCRYPTO}
     OpenSSL Support .........: ${LIBCRYPTO}
     PCRE Support ............: ${LIBPCRE}
     Perl Support ............: ${LIBPERL}
     QR Code Support .........: ${LIBQRENCODE}
 
+    Digest Frontend .........: ${DIGEST_FRONTEND}
     Mowgli Installation .....: ${MOWGLI_SOURCE}
 
     CC ......................: ${CC}

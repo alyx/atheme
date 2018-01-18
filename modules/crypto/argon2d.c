@@ -169,17 +169,10 @@ atheme_argon2d_mempool_realloc(const uint32_t mem_blocks)
 	return true;
 }
 
-#if (defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)) || \
-    defined(__LITTLE_ENDIAN__) || defined(__ARMEL__) || defined(__MIPSEL__) || defined(__AARCH64EL__) || \
-    defined(__amd64__) || defined(__i386__) || defined(_M_IX86) || defined(_M_X64) || defined(_M_AMD64)
-
-#define NATIVE_LITTLE_ENDIAN
-#endif
-
 static inline void
 blake2b_store32(uint8_t *const restrict dst, const uint32_t w)
 {
-#if defined(NATIVE_LITTLE_ENDIAN)
+#if defined(DIGEST_LITTLE_ENDIAN)
 	(void) memcpy(dst, &w, sizeof w);
 #else
 	for (size_t x = 0x00; x < 0x04; x++)
@@ -190,7 +183,7 @@ blake2b_store32(uint8_t *const restrict dst, const uint32_t w)
 static inline void
 blake2b_store64(uint8_t *const restrict dst, const uint64_t w)
 {
-#if defined(NATIVE_LITTLE_ENDIAN)
+#if defined(DIGEST_LITTLE_ENDIAN)
 	(void) memcpy(dst, &w, sizeof w);
 #else
 	for (size_t x = 0x00; x < 0x08; x++)
@@ -202,7 +195,7 @@ static inline uint64_t
 blake2b_load64(const uint8_t *const restrict src)
 {
 	uint64_t w = 0;
-#if defined(NATIVE_LITTLE_ENDIAN)
+#if defined(DIGEST_LITTLE_ENDIAN)
 	(void) memcpy(&w, src, sizeof w);
 #else
 	for (size_t x = 0x00; x < 0x08; x++)
