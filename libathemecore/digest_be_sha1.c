@@ -31,15 +31,11 @@
 
 #define SHA1_ROL(value, bits) (((value) << (bits)) | ((value) >> (0x20U - (bits))))
 
-#ifdef DIGEST_LITTLE_ENDIAN
+#define SHA1_BLK0_BE(i) block->l[i]
 
-#define SHA1_BLK0(i) \
+#define SHA1_BLK0_LE(i) \
     (block->l[i] = (SHA1_ROL(block->l[i], 0x18U) & UINT32_C(0xFF00FF00)) | \
      (SHA1_ROL(block->l[i], 0x08U) & UINT32_C(0x00FF00FF)))
-
-#else
-#define SHA1_BLK0(i) block->l[i]
-#endif
 
 #define SHA1_BLK(i) \
 	(block->l[i & 0x0FU] = SHA1_ROL(block->l[(i + 0x0DU) & 0x0FU] ^ block->l[(i + 0x08U) & 0x0FU] ^ \
@@ -47,7 +43,11 @@
 
 #define SHA1_ROUND0(v, w, x, y, z, i)                                                                                  \
     do {                                                                                                               \
-        s[z] += ((s[w] & (s[x] ^ s[y])) ^ s[y]) + SHA1_BLK0(i) + UINT32_C(0x5A827999) + SHA1_ROL(s[v], 0x05U);         \
+        if (digest_is_big_endian)                                                                                      \
+            s[z] += ((s[w] & (s[x] ^ s[y])) ^ s[y]) + SHA1_BLK0_BE(i) + UINT32_C(0x5A827999) + SHA1_ROL(s[v], 0x05U);  \
+        else                                                                                                           \
+            s[z] += ((s[w] & (s[x] ^ s[y])) ^ s[y]) + SHA1_BLK0_LE(i) + UINT32_C(0x5A827999) + SHA1_ROL(s[v], 0x05U);  \
+                                                                                                                       \
         s[w] = SHA1_ROL(s[w], 0x1EU);                                                                                  \
     } while (0)
 
@@ -84,6 +84,8 @@ union B64Q16
 static void
 transform_block_sha1(struct digest_context_sha1 *const restrict ctx, const uint8_t *const restrict in)
 {
+	const bool digest_is_big_endian = (htonl(UINT32_C(0x11223344)) == UINT32_C(0x11223344));
+
 	union B64Q16 tmp;
 	union B64Q16 *const block = &tmp;
 
