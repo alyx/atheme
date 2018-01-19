@@ -36,13 +36,6 @@
 #ifndef INC_DIGEST_H
 #define INC_DIGEST_H
 
-#if (defined(__BYTE_ORDER__) && defined(__ORDER_LITTLE_ENDIAN__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)) || \
-    defined(__LITTLE_ENDIAN__) || defined(__ARMEL__) || defined(__MIPSEL__) || defined(__AARCH64EL__) || \
-    defined(__amd64__) || defined(__i386__) || defined(_M_IX86) || defined(_M_AMD64)
-
-#define DIGEST_LITTLE_ENDIAN
-#endif
-
 #define DIGALG_MD5              0x01U
 #define DIGALG_SHA1             0x02U
 #define DIGALG_SHA2_256         0x03U
