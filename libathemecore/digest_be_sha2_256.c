@@ -43,7 +43,7 @@
 #include "atheme.h"
 #include "digest_be_sha2.h"
 
-#define SHA256_SHORT_BLOCK_LENGTH (DIGEST_BKLEN_SHA2_256 - 8)
+#define SHA256_SHORT_BLOCK_LENGTH (DIGEST_BKLEN_SHA2_256 - 0x08U)
 
 #define SHR(b, x)       ((x) >> (b))
 #define S32(b, x)       (((x) >> (b)) | ((x) << (0x20U - (b))))
