@@ -169,38 +169,40 @@ atheme_argon2d_mempool_realloc(const uint32_t mem_blocks)
 	return true;
 }
 
+static inline bool
+blake2b_is_big_endian(void)
+{
+	return (bool) (htonl(UINT32_C(0x11223344)) == UINT32_C(0x11223344));
+}
+
 static inline void
 blake2b_store32(uint8_t *const restrict dst, const uint32_t w)
 {
-#if defined(DIGEST_LITTLE_ENDIAN)
-	(void) memcpy(dst, &w, sizeof w);
-#else
-	for (size_t x = 0x00; x < 0x04; x++)
+	if (! blake2b_is_big_endian())
+		(void) memcpy(dst, &w, sizeof w);
+	else for (size_t x = 0x00; x < 0x04; x++)
 		dst[x] = (uint8_t)(w >> (x * 0x08));
-#endif
 }
 
 static inline void
 blake2b_store64(uint8_t *const restrict dst, const uint64_t w)
 {
-#if defined(DIGEST_LITTLE_ENDIAN)
-	(void) memcpy(dst, &w, sizeof w);
-#else
-	for (size_t x = 0x00; x < 0x08; x++)
+	if (! blake2b_is_big_endian())
+		(void) memcpy(dst, &w, sizeof w);
+	else for (size_t x = 0x00; x < 0x08; x++)
 		dst[x] = (uint8_t)(w >> (x * 0x08));
-#endif
 }
 
 static inline uint64_t
 blake2b_load64(const uint8_t *const restrict src)
 {
 	uint64_t w = 0;
-#if defined(DIGEST_LITTLE_ENDIAN)
-	(void) memcpy(&w, src, sizeof w);
-#else
-	for (size_t x = 0x00; x < 0x08; x++)
+
+	if (! blake2b_is_big_endian())
+		(void) memcpy(&w, src, sizeof w);
+	else for (size_t x = 0x00; x < 0x08; x++)
 		w |= (((uint64_t) src[x]) << (x * 0x08));
-#endif
+
 	return w;
 }
 
