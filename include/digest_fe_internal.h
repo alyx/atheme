@@ -54,6 +54,8 @@ typedef bool (*digest_final_fn)(union digest_state *, void *, size_t *);
 
 struct digest_context
 {
+	union digest_state      state;
+
 	uint8_t                 ikey[DIGEST_BKLEN_MAX];
 	uint8_t                 okey[DIGEST_BKLEN_MAX];
 
@@ -61,7 +63,6 @@ struct digest_context
 	digest_update_fn        update;
 	digest_final_fn         final;
 
-	union digest_state      state;
 	size_t                  blksz;
 	size_t                  digsz;
 	bool                    hmac;
