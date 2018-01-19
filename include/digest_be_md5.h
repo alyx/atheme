@@ -36,15 +36,6 @@
 #ifndef INC_DIGEST_BE_MD5_H
 #define INC_DIGEST_BE_MD5_H
 
-#define DIGEST_STLEN_MD5        0x04U
-
-struct digest_context_md5
-{
-	uint32_t        count[0x02U];
-	uint32_t        state[DIGEST_STLEN_MD5];
-	uint8_t         buf[DIGEST_BKLEN_MD5];
-};
-
 extern bool digest_init_md5(struct digest_context_md5 *);
 extern bool digest_update_md5(struct digest_context_md5 *, const void *, size_t);
 extern bool digest_final_md5(struct digest_context_md5 *, void *, size_t *);

@@ -36,15 +36,6 @@
 #ifndef INC_DIGEST_BE_SHA1_H
 #define INC_DIGEST_BE_SHA1_H
 
-#define DIGEST_STLEN_SHA1       0x05U
-
-struct digest_context_sha1
-{
-	uint32_t        count[0x02U];
-	uint32_t        state[DIGEST_STLEN_SHA1];
-	uint8_t         buf[DIGEST_BKLEN_SHA1];
-};
-
 extern bool digest_init_sha1(struct digest_context_sha1 *);
 extern bool digest_update_sha1(struct digest_context_sha1 *, const void *, size_t);
 extern bool digest_final_sha1(struct digest_context_sha1 *, void *, size_t *);

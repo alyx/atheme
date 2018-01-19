@@ -28,6 +28,7 @@
  */
 
 #include "atheme.h"
+#include "digest_be_sha1.h"
 
 #define SHA1_ROL(value, bits) (((value) << (bits)) | ((value) >> (0x20U - (bits))))
 

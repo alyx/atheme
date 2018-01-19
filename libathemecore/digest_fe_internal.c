@@ -35,6 +35,10 @@
 
 #include "atheme.h"
 
+#include "digest_be_md5.h"
+#include "digest_be_sha1.h"
+#include "digest_be_sha2.h"
+
 #define DIGEST_HMAC_INNER_XORVAL        0x36U
 #define DIGEST_HMAC_OUTER_XORVAL        0x5CU
 

@@ -43,6 +43,7 @@
  */
 
 #include "atheme.h"
+#include "digest_be_md5.h"
 
 #define MD5_ROUND1(a, b, c, d, k, r, i)                                 \
     do {                                                                \

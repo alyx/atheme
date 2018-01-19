@@ -36,9 +36,37 @@
 #ifndef INC_DIGEST_FE_INTERNAL_H
 #define INC_DIGEST_FE_INTERNAL_H
 
-#include "digest_be_md5.h"
-#include "digest_be_sha1.h"
-#include "digest_be_sha2.h"
+#define DIGEST_STLEN_MD5        0x04U
+#define DIGEST_STLEN_SHA1       0x05U
+#define DIGEST_STLEN_SHA2       0x08U
+
+struct digest_context_md5
+{
+	uint32_t        count[0x02U];
+	uint32_t        state[DIGEST_STLEN_MD5];
+	uint8_t         buf[DIGEST_BKLEN_MD5];
+};
+
+struct digest_context_sha1
+{
+	uint32_t        count[0x02U];
+	uint32_t        state[DIGEST_STLEN_SHA1];
+	uint8_t         buf[DIGEST_BKLEN_SHA1];
+};
+
+struct digest_context_sha2_256
+{
+	uint64_t        count;
+	uint32_t        state[DIGEST_STLEN_SHA2];
+	uint8_t         buf[DIGEST_BKLEN_SHA2_256];
+};
+
+struct digest_context_sha2_512
+{
+	uint64_t        count[0x02U];
+	uint64_t        state[DIGEST_STLEN_SHA2];
+	uint8_t         buf[DIGEST_BKLEN_SHA2_512];
+};
 
 union digest_state
 {

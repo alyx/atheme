@@ -36,22 +36,6 @@
 #ifndef INC_DIGEST_BE_SHA2_H
 #define INC_DIGEST_BE_SHA2_H
 
-#define DIGEST_STLEN_SHA2       0x08U
-
-struct digest_context_sha2_256
-{
-	uint64_t        count;
-	uint32_t        state[DIGEST_STLEN_SHA2];
-	uint8_t         buf[DIGEST_BKLEN_SHA2_256];
-};
-
-struct digest_context_sha2_512
-{
-	uint64_t        count[0x02U];
-	uint64_t        state[DIGEST_STLEN_SHA2];
-	uint8_t         buf[DIGEST_BKLEN_SHA2_512];
-};
-
 extern bool digest_init_sha2_256(struct digest_context_sha2_256 *);
 extern bool digest_update_sha2_256(struct digest_context_sha2_256 *, const void *, size_t);
 extern bool digest_final_sha2_256(struct digest_context_sha2_256 *, void *, size_t *);
