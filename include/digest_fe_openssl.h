@@ -41,8 +41,8 @@
 
 union digest_state
 {
-	EVP_MD_CTX              d;
-	HMAC_CTX                h;
+	EVP_MD_CTX      d;
+	HMAC_CTX        h;
 };
 
 struct digest_context
