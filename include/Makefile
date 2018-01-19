@@ -27,6 +27,8 @@ INCLUDES = \
 	database_backend.h	\
 	datastream.h		\
 	digest.h		\
+	digest_be_md5.h		\
+	digest_be_sha1.h	\
 	digest_fe_internal.h	\
 	digest_fe_mbedtls.h	\
 	digest_fe_openssl.h	\
