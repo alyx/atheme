@@ -71,7 +71,6 @@ digest_init(struct digest_context *const restrict ctx, const unsigned int alg)
 			ctx->digsz  = DIGEST_MDLEN_SHA1;
 			break;
 
-/*
 		case DIGALG_SHA2_256:
 			ctx->init   = (digest_init_fn)   &digest_init_sha2_256;
 			ctx->update = (digest_update_fn) &digest_update_sha2_256;
@@ -80,6 +79,7 @@ digest_init(struct digest_context *const restrict ctx, const unsigned int alg)
 			ctx->digsz  = DIGEST_MDLEN_SHA2_256;
 			break;
 
+/*
 		case DIGALG_SHA2_512:
 			ctx->init   = (digest_init_fn)   &digest_init_sha2_512;
 			ctx->update = (digest_update_fn) &digest_update_sha2_512;

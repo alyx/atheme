@@ -592,7 +592,7 @@ AC_SUBST([LDFLAGS])
 
 
 dnl Digest interface to use
-DIGEST_C="digest_fe_internal.c digest_fe_internal_testsuite.c digest_be_md5.c digest_be_sha1.c"
+DIGEST_C="digest_fe_internal.c digest_fe_internal_testsuite.c digest_be_md5.c digest_be_sha1.c digest_be_sha2_256.c"
 DIGEST_H="digest_fe_internal.h"
 DIGEST_FRONTEND="Internal"
 
