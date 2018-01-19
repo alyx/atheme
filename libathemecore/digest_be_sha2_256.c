@@ -43,15 +43,15 @@
 #include "atheme.h"
 #include "digest_be_sha2.h"
 
-#define SHA256_SHORT_BLOCK_LENGTH (DIGEST_BKLEN_SHA2_256 - 0x08U)
+#define DIGEST_SHORT_BKLEN (DIGEST_BKLEN_SHA2_256 - 0x08U)
 
 #define SHR(b, x)       ((x) >> (b))
 #define S32(b, x)       (((x) >> (b)) | ((x) << (0x20U - (b))))
 
-#define Sigma0_256(x)   (S32(0x02U, (x)) ^ S32(0x0DU, (x)) ^ S32(0x16U, (x)))
-#define Sigma1_256(x)   (S32(0x06U, (x)) ^ S32(0x0BU, (x)) ^ S32(0x19U, (x)))
-#define sigma0_256(x)   (S32(0x07U, (x)) ^ S32(0x12U, (x)) ^ SHR(0x03U, (x)))
-#define sigma1_256(x)   (S32(0x11U, (x)) ^ S32(0x13U, (x)) ^ SHR(0x0AU, (x)))
+#define Sigma0(x)       (S32(0x02U, (x)) ^ S32(0x0DU, (x)) ^ S32(0x16U, (x)))
+#define Sigma1(x)       (S32(0x06U, (x)) ^ S32(0x0BU, (x)) ^ S32(0x19U, (x)))
+#define sigma0(x)       (S32(0x07U, (x)) ^ S32(0x12U, (x)) ^ SHR(0x03U, (x)))
+#define sigma1(x)       (S32(0x11U, (x)) ^ S32(0x13U, (x)) ^ SHR(0x0AU, (x)))
 
 #define Ch(x, y, z)     (((x) & (y)) ^ ((~(x)) & (z)))
 #define Maj(x, y, z)    (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
@@ -71,35 +71,35 @@
         (x) = ((tmp & UINT64_C(0xFFFF0000FFFF0000)) >> 0x10U) | ((tmp & UINT64_C(0x0000FFFF0000FFFF)) << 0x10U);    \
     } while (0)
 
-#define ROUND256_0_TO_15(a, b, c, d, e, f, g, h)                                                                    \
+#define ROUND_0_TO_15(a, b, c, d, e, f, g, h)                                                                       \
     do {                                                                                                            \
-        uint32_t t1 = s[h] + Sigma1_256(s[e]) + Ch(s[e], s[f], s[g]) + K256[j] + W256[j];                           \
-        s[h] = t1 + Sigma0_256(s[a]) + Maj(s[a], s[b], s[c]);                                                       \
+        uint32_t t1 = s[h] + Sigma1(s[e]) + Ch(s[e], s[f], s[g]) + K[j] + W[j];                                     \
+        s[h] = t1 + Sigma0(s[a]) + Maj(s[a], s[b], s[c]);                                                           \
         s[d] += t1;                                                                                                 \
         j++;                                                                                                        \
     } while (0)
 
-#define ROUND256_0_TO_15_BE(a, b, c, d, e, f, g, h)                                                                 \
+#define ROUND_0_TO_15_BE(a, b, c, d, e, f, g, h)                                                                    \
     do {                                                                                                            \
-        W256[j] = *data++;                                                                                          \
-        ROUND256_0_TO_15(a, b, c, d, e, f, g, h);                                                                   \
+        W[j] = *data++;                                                                                             \
+        ROUND_0_TO_15(a, b, c, d, e, f, g, h);                                                                      \
     } while (0)
 
-#define ROUND256_0_TO_15_LE(a, b, c, d, e, f, g, h)                                                                 \
+#define ROUND_0_TO_15_LE(a, b, c, d, e, f, g, h)                                                                    \
     do {                                                                                                            \
-        REVERSE32(*data++, W256[j]);                                                                                \
-        ROUND256_0_TO_15(a, b, c, d, e, f, g, h);                                                                   \
+        REVERSE32(*data++, W[j]);                                                                                   \
+        ROUND_0_TO_15(a, b, c, d, e, f, g, h);                                                                      \
     } while (0)
 
-#define ROUND256(a, b, c, d, e, f, g, h)                                                                            \
+#define ROUND(a, b, c, d, e, f, g, h)                                                                               \
     do {                                                                                                            \
-        uint32_t s0 = W256[(j + 0x01U) & 0x0FU];                                                                    \
-        uint32_t s1 = W256[(j + 0x0EU) & 0x0FU];                                                                    \
-        s0 = sigma0_256(s0);                                                                                        \
-        s1 = sigma1_256(s1);                                                                                        \
-        W256[j & 0x0FU] += s1 + W256[(j + 0x09U) & 0x0FU] + s0;                                                     \
-        uint32_t t1 = s[h] + Sigma1_256(s[e]) + Ch(s[e], s[f], s[g]) + K256[j] + W256[j & 0x0FU];                   \
-        s[h] = t1 + Sigma0_256(s[a]) + Maj(s[a], s[b], s[c]);                                                       \
+        uint32_t s0 = W[(j + 0x01U) & 0x0FU];                                                                       \
+        uint32_t s1 = W[(j + 0x0EU) & 0x0FU];                                                                       \
+        s0 = sigma0(s0);                                                                                            \
+        s1 = sigma1(s1);                                                                                            \
+        W[j & 0x0FU] += s1 + W[(j + 0x09U) & 0x0FU] + s0;                                                           \
+        uint32_t t1 = s[h] + Sigma1(s[e]) + Ch(s[e], s[f], s[g]) + K[j] + W[j & 0x0FU];                             \
+        s[h] = t1 + Sigma0(s[a]) + Maj(s[a], s[b], s[c]);                                                           \
         s[d] += t1;                                                                                                 \
         j++;                                                                                                        \
     } while (0)
@@ -111,9 +111,9 @@ digest_is_big_endian(void)
 }
 
 static void
-transform_block_sha2_256(struct digest_context_sha2_256 *const ctx, const uint32_t *data)
+digest_transform_block(struct digest_context_sha2_256 *const ctx, const uint32_t *data)
 {
-	static const uint32_t K256[] = {
+	static const uint32_t K[] = {
 
 		UINT32_C(0x428A2F98), UINT32_C(0x71374491), UINT32_C(0xB5C0FBCF), UINT32_C(0xE9B5DBA5),
 		UINT32_C(0x3956C25B), UINT32_C(0x59F111F1), UINT32_C(0x923F82A4), UINT32_C(0xAB1C5ED5),
@@ -133,50 +133,51 @@ transform_block_sha2_256(struct digest_context_sha2_256 *const ctx, const uint32
 		UINT32_C(0x90BEFFFA), UINT32_C(0xA4506CEB), UINT32_C(0xBEF9A3F7), UINT32_C(0xC67178F2),
 	};
 
-	uint32_t s[DIGEST_STLEN_SHA2];
-	uint32_t *const W256 = (uint32_t *) ctx->buf;
+	uint32_t *const W = (uint32_t *) ctx->buf;
 	uint32_t j = 0x00U;
+
+	uint32_t s[DIGEST_STLEN_SHA2];
 
 	(void) memcpy(s, ctx->state, sizeof s);
 
 	if (digest_is_big_endian())
 	{
 		do {
-			ROUND256_0_TO_15_BE(0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U);
-			ROUND256_0_TO_15_BE(0x07U, 0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U);
-			ROUND256_0_TO_15_BE(0x06U, 0x07U, 0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U);
-			ROUND256_0_TO_15_BE(0x05U, 0x06U, 0x07U, 0x00U, 0x01U, 0x02U, 0x03U, 0x04U);
-			ROUND256_0_TO_15_BE(0x04U, 0x05U, 0x06U, 0x07U, 0x00U, 0x01U, 0x02U, 0x03U);
-			ROUND256_0_TO_15_BE(0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x00U, 0x01U, 0x02U);
-			ROUND256_0_TO_15_BE(0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x00U, 0x01U);
-			ROUND256_0_TO_15_BE(0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x00U);
+			ROUND_0_TO_15_BE(0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U);
+			ROUND_0_TO_15_BE(0x07U, 0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U);
+			ROUND_0_TO_15_BE(0x06U, 0x07U, 0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U);
+			ROUND_0_TO_15_BE(0x05U, 0x06U, 0x07U, 0x00U, 0x01U, 0x02U, 0x03U, 0x04U);
+			ROUND_0_TO_15_BE(0x04U, 0x05U, 0x06U, 0x07U, 0x00U, 0x01U, 0x02U, 0x03U);
+			ROUND_0_TO_15_BE(0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x00U, 0x01U, 0x02U);
+			ROUND_0_TO_15_BE(0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x00U, 0x01U);
+			ROUND_0_TO_15_BE(0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x00U);
 
 		} while (j < 0x10U);
 	}
 	else
 	{
 		do {
-			ROUND256_0_TO_15_LE(0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U);
-			ROUND256_0_TO_15_LE(0x07U, 0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U);
-			ROUND256_0_TO_15_LE(0x06U, 0x07U, 0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U);
-			ROUND256_0_TO_15_LE(0x05U, 0x06U, 0x07U, 0x00U, 0x01U, 0x02U, 0x03U, 0x04U);
-			ROUND256_0_TO_15_LE(0x04U, 0x05U, 0x06U, 0x07U, 0x00U, 0x01U, 0x02U, 0x03U);
-			ROUND256_0_TO_15_LE(0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x00U, 0x01U, 0x02U);
-			ROUND256_0_TO_15_LE(0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x00U, 0x01U);
-			ROUND256_0_TO_15_LE(0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x00U);
+			ROUND_0_TO_15_LE(0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U);
+			ROUND_0_TO_15_LE(0x07U, 0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U);
+			ROUND_0_TO_15_LE(0x06U, 0x07U, 0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U);
+			ROUND_0_TO_15_LE(0x05U, 0x06U, 0x07U, 0x00U, 0x01U, 0x02U, 0x03U, 0x04U);
+			ROUND_0_TO_15_LE(0x04U, 0x05U, 0x06U, 0x07U, 0x00U, 0x01U, 0x02U, 0x03U);
+			ROUND_0_TO_15_LE(0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x00U, 0x01U, 0x02U);
+			ROUND_0_TO_15_LE(0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x00U, 0x01U);
+			ROUND_0_TO_15_LE(0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x00U);
 
 		} while (j < 0x10U);
 	}
 
 	do {
-		ROUND256(0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U);
-		ROUND256(0x07U, 0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U);
-		ROUND256(0x06U, 0x07U, 0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U);
-		ROUND256(0x05U, 0x06U, 0x07U, 0x00U, 0x01U, 0x02U, 0x03U, 0x04U);
-		ROUND256(0x04U, 0x05U, 0x06U, 0x07U, 0x00U, 0x01U, 0x02U, 0x03U);
-		ROUND256(0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x00U, 0x01U, 0x02U);
-		ROUND256(0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x00U, 0x01U);
-		ROUND256(0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x00U);
+		ROUND(0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U);
+		ROUND(0x07U, 0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U);
+		ROUND(0x06U, 0x07U, 0x00U, 0x01U, 0x02U, 0x03U, 0x04U, 0x05U);
+		ROUND(0x05U, 0x06U, 0x07U, 0x00U, 0x01U, 0x02U, 0x03U, 0x04U);
+		ROUND(0x04U, 0x05U, 0x06U, 0x07U, 0x00U, 0x01U, 0x02U, 0x03U);
+		ROUND(0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x00U, 0x01U, 0x02U);
+		ROUND(0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x00U, 0x01U);
+		ROUND(0x01U, 0x02U, 0x03U, 0x04U, 0x05U, 0x06U, 0x07U, 0x00U);
 
 	} while (j < 0x40U);
 
@@ -208,7 +209,8 @@ digest_init_sha2_256(struct digest_context_sha2_256 *const restrict ctx)
 }
 
 bool
-digest_update_sha2_256(struct digest_context_sha2_256 *const restrict ctx, const void *const in, const size_t len)
+digest_update_sha2_256(struct digest_context_sha2_256 *const restrict ctx,
+                       const void *const restrict in, const size_t len)
 {
 	if (! ctx)
 	{
@@ -222,16 +224,16 @@ digest_update_sha2_256(struct digest_context_sha2_256 *const restrict ctx, const
 	const uint8_t *ptr = in;
 	size_t rem = len;
 
-	uint64_t usedspace = (uint64_t) ((ctx->count >> 0x03U) % DIGEST_BKLEN_SHA2_256);
+	const uint64_t usedspace = (uint64_t) ((ctx->count >> 0x03U) % DIGEST_BKLEN_SHA2_256);
 
 	if (usedspace)
 	{
-		uint64_t freespace = (DIGEST_BKLEN_SHA2_256 - usedspace);
+		const uint64_t freespace = (DIGEST_BKLEN_SHA2_256 - usedspace);
 
 		if (rem >= freespace)
 		{
 			(void) memcpy(ctx->buf + usedspace, ptr, (size_t) freespace);
-			(void) transform_block_sha2_256(ctx, (const uint32_t *) ctx->buf);
+			(void) digest_transform_block(ctx, (const void *) ctx->buf);
 
 			ctx->count += (freespace << 0x03U);
 
@@ -250,7 +252,7 @@ digest_update_sha2_256(struct digest_context_sha2_256 *const restrict ctx, const
 
 	while (rem >= DIGEST_BKLEN_SHA2_256)
 	{
-		(void) transform_block_sha2_256(ctx, (const uint32_t *) ptr);
+		(void) digest_transform_block(ctx, (const void *) ptr);
 
 		ctx->count += (DIGEST_BKLEN_SHA2_256 << 0x03U);
 
@@ -294,8 +296,6 @@ digest_final_sha2_256(struct digest_context_sha2_256 *const restrict ctx,
 		*len = DIGEST_MDLEN_SHA2_256;
 	}
 
-	uint32_t *d = (uint32_t *) out;
-
 	uint64_t usedspace = (ctx->count >> 0x03U) % DIGEST_BKLEN_SHA2_256;
 
 	if (! digest_is_big_endian())
@@ -305,9 +305,9 @@ digest_final_sha2_256(struct digest_context_sha2_256 *const restrict ctx,
 	{
 		ctx->buf[usedspace++] = 0x80U;
 
-		if (usedspace <= SHA256_SHORT_BLOCK_LENGTH)
+		if (usedspace <= DIGEST_SHORT_BKLEN)
 		{
-			(void) memset(ctx->buf + usedspace, 0x00U, (SHA256_SHORT_BLOCK_LENGTH - usedspace));
+			(void) memset(ctx->buf + usedspace, 0x00U, (DIGEST_SHORT_BKLEN - usedspace));
 		}
 		else
 		{
@@ -316,24 +316,26 @@ digest_final_sha2_256(struct digest_context_sha2_256 *const restrict ctx,
 				(void) memset(ctx->buf + usedspace, 0x00U, (DIGEST_BKLEN_SHA2_256 - usedspace));
 			}
 
-			(void) transform_block_sha2_256(ctx, (const uint32_t *) ctx->buf);
-			(void) memset(ctx->buf, 0x00U, SHA256_SHORT_BLOCK_LENGTH);
+			(void) digest_transform_block(ctx, (const void *) ctx->buf);
+			(void) memset(ctx->buf, 0x00U, DIGEST_SHORT_BKLEN);
 		}
 	}
 	else
 	{
-		(void) memset(ctx->buf, 0x00U, SHA256_SHORT_BLOCK_LENGTH);
+		(void) memset(ctx->buf, 0x00U, DIGEST_SHORT_BKLEN);
 
 		ctx->buf[0x00U] = 0x80U;
 	}
 
-	*((uint64_t *) &ctx->buf[SHA256_SHORT_BLOCK_LENGTH]) = ctx->count;
+	*((uint64_t *) &ctx->buf[DIGEST_SHORT_BKLEN]) = ctx->count;
 
-	(void) transform_block_sha2_256(ctx, (const uint32_t *) ctx->buf);
+	(void) digest_transform_block(ctx, (const void *) ctx->buf);
+
+	uint32_t *d = (uint32_t *) out;
 
 	if (digest_is_big_endian())
 		(void) memcpy(d, ctx->state, sizeof ctx->state);
-	else for (size_t i = 0x00U; i < 0x08U; i++)
+	else for (size_t i = 0x00U; i < DIGEST_STLEN_SHA2; i++)
 		REVERSE32(ctx->state[i], *d++);
 
 	(void) explicit_bzero(ctx, sizeof *ctx);
