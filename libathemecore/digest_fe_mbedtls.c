@@ -85,16 +85,22 @@ digest_init(struct digest_context *const restrict ctx, const unsigned int alg)
 	}
 
 	(void) memset(ctx, 0x00, sizeof *ctx);
-	(void) mbedtls_md_init(&ctx->state);
 
 	if (! (ctx->md = digest_decide_md(alg)))
 		return false;
 
-	if (mbedtls_md_setup(&ctx->state, ctx->md, 0) != 0)
-		return false;
+	(void) mbedtls_md_init(&ctx->state);
 
-	if (mbedtls_md_starts(&ctx->state) != 0)
+	if (mbedtls_md_setup(&ctx->state, ctx->md, 0) != 0)
+	{
+		(void) mbedtls_md_free(&ctx->state);
 		return false;
+	}
+	if (mbedtls_md_starts(&ctx->state) != 0)
+	{
+		(void) mbedtls_md_free(&ctx->state);
+		return false;
+	}
 
 	return true;
 }
@@ -110,18 +116,24 @@ digest_init_hmac(struct digest_context *const restrict ctx, const unsigned int a
 	}
 
 	(void) memset(ctx, 0x00, sizeof *ctx);
-	(void) mbedtls_md_init(&ctx->state);
-
-	ctx->hmac = true;
 
 	if (! (ctx->md = digest_decide_md(alg)))
 		return false;
 
-	if (mbedtls_md_setup(&ctx->state, ctx->md, 1) != 0)
-		return false;
+	ctx->hmac = true;
 
-	if (mbedtls_md_hmac_starts(&ctx->state, key, keyLen) != 0)
+	(void) mbedtls_md_init(&ctx->state);
+
+	if (mbedtls_md_setup(&ctx->state, ctx->md, 1) != 0)
+	{
+		(void) mbedtls_md_free(&ctx->state);
 		return false;
+	}
+	if (mbedtls_md_hmac_starts(&ctx->state, key, keyLen) != 0)
+	{
+		(void) mbedtls_md_free(&ctx->state);
+		return false;
+	}
 
 	return true;
 }
@@ -141,12 +153,18 @@ digest_update(struct digest_context *const restrict ctx, const void *const restr
 	if (ctx->hmac)
 	{
 		if (mbedtls_md_hmac_update(&ctx->state, data, dataLen) != 0)
+		{
+			(void) mbedtls_md_free(&ctx->state);
 			return false;
+		}
 	}
 	else
 	{
 		if (mbedtls_md_update(&ctx->state, data, dataLen) != 0)
+		{
+			(void) mbedtls_md_free(&ctx->state);
 			return false;
+		}
 	}
 
 	return true;
@@ -177,12 +195,18 @@ digest_final(struct digest_context *const restrict ctx, void *const restrict out
 	if (ctx->hmac)
 	{
 		if (mbedtls_md_hmac_finish(&ctx->state, out) != 0)
+		{
+			(void) mbedtls_md_free(&ctx->state);
 			return false;
+		}
 	}
 	else
 	{
 		if (mbedtls_md_finish(&ctx->state, out) != 0)
+		{
+			(void) mbedtls_md_free(&ctx->state);
 			return false;
+		}
 	}
 
 	if (outLen)
