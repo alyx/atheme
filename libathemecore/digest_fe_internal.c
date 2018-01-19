@@ -118,7 +118,7 @@ digest_init_hmac(struct digest_context *const restrict ctx, const unsigned int a
 			if (! digest_oneshot(alg, key, keyLen, ctx->ikey, NULL))
 				return false;
 
-			(void) memcpy(ctx->okey, ctx->ikey, ctx->blksz);
+			(void) memcpy(ctx->okey, ctx->ikey, ctx->digsz);
 		}
 		else
 		{
