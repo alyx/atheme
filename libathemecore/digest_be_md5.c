@@ -91,16 +91,16 @@ md5_process_words(struct digest_context_md5 *const ctx, const uint8_t *data)
 		UINT32_C(0xF7537E82), UINT32_C(0xBD3AF235), UINT32_C(0x2AD7D2BB), UINT32_C(0xEB86D391),
 	};
 
+	const bool digest_is_big_endian = (htonl(UINT32_C(0x11223344)) == UINT32_C(0x11223344));
+
 	uint32_t x[0x10U];
 	uint32_t s[0x04U];
 	uint32_t t;
 
-#ifndef DIGEST_LITTLE_ENDIAN
-	for (size_t i = 0x00U; i < 0x10U; i++)
+	if (! digest_is_big_endian)
+		(void) memcpy(x, data, sizeof x);
+	else for (size_t i = 0x00U; i < 0x10U; i++)
 		x[i] = data[i] + (data[i + 0x01U] << 0x08U) + (data[i + 0x02U] << 0x10U) + (data[i + 0x03U] << 0x18U);
-#else
-	(void) memcpy(x, data, sizeof x);
-#endif
 
 	(void) memcpy(s, ctx->state, sizeof s);
 
