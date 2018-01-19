@@ -1,5 +1,5 @@
 /*
- * OpenSSL frontend for the digest interface.
+ * ARM mbedTLS frontend for the digest interface.
  *
  * Copyright (C) 2018 Aaron M. D. Jones <aaronmdjones@gmail.com>
  *
