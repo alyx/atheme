@@ -66,7 +66,7 @@ SRCS =				\
 include ../extra.mk
 include ../buildsys.mk
 
-CPPFLAGS	+= $(PCRE_CFLAGS) $(LIBQRENCODE_CFLAGS) -I../include
+CPPFLAGS	+= $(PCRE_CFLAGS) $(LIBQRENCODE_CFLAGS) -I../include -I.
 CFLAGS		+= $(LIB_CFLAGS)
 LIBS		+= $(LIBCRYPTO_LIBS) $(LIBMBEDCRYPTO_LIBS) $(LIBINTL) $(PCRE_LIBS) $(LIBQRENCODE_LIBS)
 
